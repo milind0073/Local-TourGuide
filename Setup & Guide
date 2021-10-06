@@ -1,0 +1,15 @@
+Guide through app:
+Top Section is nav bar which is made using bootstrap
+Middle part is form which is simple html
+Then comes Map with location of all point
+Then Comes footer which is made using React
+
+Setup.
+Clone Project
+Run sql query on Sqlyog or any other Dbms
+make sure name of database and table are same
+run following on command prompt after going to same folder
+npm install
+npm start
+
+Enjoy Site.
