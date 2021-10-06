@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="index.css">
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>React App</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+	<nav class="navbar navbar-expand-md">
+	<a class="navbar-brand" href="#">Home</a>
+	<button class="navbar-toggler navbar-dark" type="button" data-toggle="collapse" data-target="#main-navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="main-navigation">
+		<ul class="navbar-nav">
+		<li class="nav-item">
+			<a class="nav-link" href="#">Map</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="#">About us</a>
+		</li>
+		</ul>
+	</div>
+	</nav>
+
+	<header class="page-header header container-fluid">
+		<h1>Hamilton Tourism place</h1>
+	</header>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="main.js"></script>
+	<script src="jquery-3.5.1.min.js"></script>
+	
+	<script type="text/javascript" src="education.js"></script>
+		<form id="newpin" style='text-align:center'>
+		  Search: <input type="text" id="address">
+		  <input type="submit">
+		</form>
+			
+		<div id='myMap' 
+		     style='position:relative; width: 350px; height: 300px; margin-left:38%'>
+	    </div>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+		<script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?key=Ag-9UmaOu3hCq2d2bxFTnt2ryCnUmD81o8_dEMuHCqbAFJ0TMwiY1IuhzPUjRaC6&callback=loadMapScenario' async defer></script>
+        <script type='text/javascript'>
+		
+		  var map;
+          var directionsManager;
+		  var lat;
+		  var lng;
+		  var searchManager;
+		  
+		  $(document).ready( function() 
+		  {
+		  
+		    $("#newpin").submit(function()
+			{
+			   geocodeQuery($("#address").val(), $("#name").val());
+			});
+			
+			return false;
+		  
+		  });
+ 
+ 
+     function geocodeQuery(query,name) {
+        //If search manager is not defined, load the search module.
+        if (!searchManager) {
+            //Create an instance of the search manager and call the geocodeQuery function again.
+            Microsoft.Maps.loadModule('Microsoft.Maps.Search', function () {
+                searchManager = new Microsoft.Maps.Search.SearchManager(map);
+                geocodeQuery(query, name);
+            });
+        } else {
+            var searchRequest = {
+                where: query,
+                callback: function (r) {
+                    //Add the first result to the map and zoom into it.
+                    if (r && r.results && r.results.length > 0) {
+                        var pin = new Microsoft.Maps.Pushpin(r.results[0].location, {title: name});
+                        map.entities.push(pin);
+
+                      //  map.setView({ bounds: r.results[0].bestView });
+                    }
+                },
+                errorCallback: function (e) {
+                    //If there is an error, alert the user about it.
+                    alert("No results found.");
+                }
+            };
+
+            //Make the geocode request.
+            searchManager.geocode(searchRequest);
+        }
+    }
+
+		  // function that is called when Bing Maps finishes loading
+		  function loadMapScenario() {
+		  
+			// create a Map, centered in Hamilton
+			map = new Microsoft.Maps.Map(
+						document.getElementById('myMap'), 
+						{center: new Microsoft.Maps.Location(43.2557, -79.871) });
+			
+			navigator.geolocation.getCurrentPosition(function(position){
+
+		      lat = position.coords.latitude;
+			  lng = position.coords.longitude;
+		
+              addgeopin();
+			  
+            });	
+			
+			//Create an infobox at the center of the map but don't show it.
+            infobox = new Microsoft.Maps.Infobox(map.getCenter(), {
+              visible: false
+            });
+
+            //Assign the infobox to a map instance.
+            infobox.setMap(map);
+
+			for (i = 0; i < education.length; i++)
+			{
+
+			  var location = new Microsoft.Maps.Location(
+									education[i].LATITUDE,
+									education[i].LONGITUDE
+									);
+									
+			  // create a pushpin at this location, give it a label with 
+			  // the fire station name
+			  var pushpin = new Microsoft.Maps.Pushpin(
+							  location
+							  ,{} );
+							  
+			  //Store some metadata with the pushpin.
+              pushpin.metadata = {
+                description: 
+				  "<a href='" + education[i].WEBSITE + "' target='_blank'>" +
+				  education[i].NAME + "</a><br />" +
+				  education[i].ADDRESS + "<br />" +
+				  education[i].CATEGORY + "<br />" +
+				  education[i].COMMUNITY + "<br />" + 
+				  "<a href='#' onclick='return directions(" +
+				    education[i].LATITUDE + "," +
+				    education[i].LONGITUDE + ");" + "'>directions</a>"
+              };
+			
+			  Microsoft.Maps.Events.addHandler(pushpin, 'click', pushpinClicked);
+
+			  // add the pushpin to the map
+			  map.entities.push(pushpin);
+			}
+			
+	        //Load the directions module.
+            Microsoft.Maps.loadModule('Microsoft.Maps.Directions',    
+              function () {
+            
+			  //Create an instance of the directions manager.
+              directionsManager = 
+				new Microsoft.Maps.Directions.DirectionsManager(map);
+
+              }
+	        );			
+		  }
+		  
+		  function addgeopin()
+		  {
+		  	  
+			  var location = new Microsoft.Maps.Location(
+									lat,
+									lng
+									);
+									
+			  // create a pushpin at this location, give it a label with 
+			  // the fire station name
+			  var pushpin = new Microsoft.Maps.Pushpin(
+							  location
+							  ,{} );
+							  
+			  //Store some metadata with the pushpin.
+              pushpin.metadata = {
+                description: 
+				  lat + "," + lng
+
+              };
+			
+			  Microsoft.Maps.Events.addHandler(pushpin, 'click', pushpinClicked);
+
+			  // add the pushpin to the map
+			  map.entities.push(pushpin);
+			  
+		  }
+
+	      function pushpinClicked(e) {
+		    //Make sure the infobox has metadata to display.
+			if (e.target.metadata) {
+			//Set the infobox options with the metadata of the pushpin.
+			infobox.setOptions({
+			  location: e.target.getLocation(),
+			  description: e.target.metadata.description,
+			  visible: true
+			});
+			}
+		  }
+		  
+		  function filterpins(filterstr)
+		  {
+
+
+             clearDirections();
+
+
+             infobox.setOptions({
+			  visible: false
+			});
+			
+           for (var i = map.entities.getLength() - 1; i >= 0; i--) {
+              var pushpin = map.entities.get(i);
+              if (pushpin instanceof Microsoft.Maps.Pushpin) {
+                map.entities.removeAt(i);
+            }
+           }
+
+              addgeopin();
+	
+			for (i = 0; i < education.length; i++)
+			{
+
+              if (filterstr == education[i].CATEGORY || filterstr == "all")
+			  {
+			    var location = new Microsoft.Maps.Location(
+				  					education[i].LATITUDE,
+					  				education[i].LONGITUDE
+									);
+									
+			  // create a pushpin at this location, give it a label with 
+			  // the fire station name
+			  var pushpin = new Microsoft.Maps.Pushpin(
+							  location
+							  ,{} );
+							  
+			  //Store some metadata with the pushpin.
+              pushpin.metadata = {
+                description: 
+				  "<a href='" + education[i].WEBSITE + "' target='_blank'>" +
+				  education[i].NAME + "</a><br />" +
+				  education[i].ADDRESS + "<br />" +
+				  education[i].CATEGORY + "<br />" +
+				  education[i].COMMUNITY + "<br />" + 
+				  "<a href='#' onclick='return directions(" +
+				    education[i].LATITUDE + "," +
+				    education[i].LONGITUDE + ");" + "'>directions</a>"
+              };
+			
+			  Microsoft.Maps.Events.addHandler(pushpin, 'click', pushpinClicked);
+
+			  // add the pushpin to the map
+			  map.entities.push(pushpin);
+            }			  
+		    }
+		  }
+
+
+          function directions(tolat, tolng)
+          {
+		  
+		      console.log(tolat);
+ 
+ 		    directionsManager.clearAll();
+
+                //Create waypoints to route between.
+                var seattleWaypoint = 
+			      new Microsoft.Maps.Directions.Waypoint({ 
+				  
+				   location: new Microsoft.Maps.Location(lat, lng)
+				   
+				   });
+                directionsManager.addWaypoint(seattleWaypoint);
+
+                var workWaypoint = 
+			      new Microsoft.Maps.Directions.Waypoint({
+				  location: new Microsoft.Maps.Location(tolat, tolng) });
+                directionsManager.addWaypoint(workWaypoint);
+
+                //Specify the element in which the itinerary will be rendered.
+                directionsManager.setRenderOptions({ itineraryContainer: '#directionsItinerary' });
+
+                //Calculate directions.
+                directionsManager.calculateDirections();
+            
+		
+        }
+		
+        </script>
+		<script>
+		  function clearDirections()
+		  {
+		    directionsManager.clearAll();
+		  }
+		</script>
+    <div id="root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+</html>
